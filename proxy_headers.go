@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 var (
@@ -41,80 +40,45 @@ var (
 // a proxy), can manifest as a vulnerability if your application uses these
 // headers for validating the 'trustworthiness' of a request.
 func ProxyHeaders(h http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		// Set the remote IP with the value passed from the proxy.
-		if fwd := getIP(r); fwd != "" {
-			r.RemoteAddr = fwd
-		}
-
-		// Set the scheme (proto) with the value passed from the proxy.
-		if scheme := getScheme(r); scheme != "" {
-			r.URL.Scheme = scheme
-		}
-		// Set the host with the value passed by the proxy
-		if r.Header.Get(xForwardedHost) != "" {
-			r.Host = r.Header.Get(xForwardedHost)
-		}
-		// Call the next handler in the chain.
-		h.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
+	_ = "STUB: not implemented"
+	return *new(http.Handler)
 }
+
+// Set the remote IP with the value passed from the proxy.
+
+// Set the scheme (proto) with the value passed from the proxy.
+
+// Set the host with the value passed by the proxy
+
+// Call the next handler in the chain.
 
 // getIP retrieves the IP from the X-Forwarded-For, X-Real-IP and RFC7239
 // Forwarded headers (in that order).
-func getIP(r *http.Request) string {
-	var addr string
+func getIP(r *http.Request) string { _ = "STUB: not implemented"; return "" }
 
-	switch {
-	case r.Header.Get(xForwardedFor) != "":
-		fwd := r.Header.Get(xForwardedFor)
-		// Only grab the first (client) address. Note that '192.168.0.1,
-		// 10.1.1.1' is a valid key for X-Forwarded-For where addresses after
-		// the first may represent forwarding proxies earlier in the chain.
-		s := strings.Index(fwd, ", ")
-		if s == -1 {
-			s = len(fwd)
-		}
-		addr = fwd[:s]
-	case r.Header.Get(xRealIP) != "":
-		addr = r.Header.Get(xRealIP)
-	case r.Header.Get(forwarded) != "":
-		// match should contain at least two elements if the protocol was
-		// specified in the Forwarded header. The first element will always be
-		// the 'for=' capture, which we ignore. In the case of multiple IP
-		// addresses (for=8.8.8.8, 8.8.4.4,172.16.1.20 is valid) we only
-		// extract the first, which should be the client IP.
-		if match := forRegex.FindStringSubmatch(r.Header.Get(forwarded)); len(match) > 1 {
-			// IPv6 addresses in Forwarded headers are quoted-strings. We strip
-			// these quotes.
-			addr = strings.Trim(match[1], `"`)
-		}
-	}
+// Only grab the first (client) address. Note that '192.168.0.1,
+// 10.1.1.1' is a valid key for X-Forwarded-For where addresses after
+// the first may represent forwarding proxies earlier in the chain.
 
-	return addr
-}
+// match should contain at least two elements if the protocol was
+// specified in the Forwarded header. The first element will always be
+// the 'for=' capture, which we ignore. In the case of multiple IP
+// addresses (for=8.8.8.8, 8.8.4.4,172.16.1.20 is valid) we only
+// extract the first, which should be the client IP.
+
+// IPv6 addresses in Forwarded headers are quoted-strings. We strip
+// these quotes.
 
 // getScheme retrieves the scheme from the X-Forwarded-Proto and RFC7239
 // Forwarded headers (in that order).
 func getScheme(r *http.Request) string {
-	var scheme string
+	_ = "STUB: not implemented"
 
 	// Retrieve the scheme from X-Forwarded-Proto.
-	if proto := r.Header.Get(xForwardedProto); proto != "" {
-		scheme = strings.ToLower(proto)
-	} else if proto = r.Header.Get(xForwardedScheme); proto != "" {
-		scheme = strings.ToLower(proto)
-	} else if proto = r.Header.Get(forwarded); proto != "" {
-		// match should contain at least two elements if the protocol was
-		// specified in the Forwarded header. The first element will always be
-		// the 'proto=' capture, which we ignore. In the case of multiple proto
-		// parameters (invalid) we only extract the first.
-		if match := protoRegex.FindStringSubmatch(proto); len(match) > 1 {
-			scheme = strings.ToLower(match[1])
-		}
-	}
-
-	return scheme
+	return ""
 }
+
+// match should contain at least two elements if the protocol was
+// specified in the Forwarded header. The first element will always be
+// the 'proto=' capture, which we ignore. In the case of multiple proto
+// parameters (invalid) we only extract the first.

@@ -6,11 +6,8 @@ package handlers
 
 import (
 	"bufio"
-	"fmt"
 	"net"
 	"net/http"
-	"sort"
-	"strings"
 )
 
 // MethodHandler is an http.Handler that dispatches to a handler whose key in the
@@ -26,21 +23,8 @@ import (
 type MethodHandler map[string]http.Handler
 
 func (h MethodHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if handler, ok := h[req.Method]; ok {
-		handler.ServeHTTP(w, req)
-	} else {
-		allow := []string{}
-		for k := range h {
-			allow = append(allow, k)
-		}
-		sort.Strings(allow)
-		w.Header().Set("Allow", strings.Join(allow, ", "))
-		if req.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // responseLogger is wrapper of http.ResponseWriter that keeps track of its HTTP
@@ -51,44 +35,25 @@ type responseLogger struct {
 	size   int
 }
 
-func (l *responseLogger) Write(b []byte) (int, error) {
-	size, err := l.w.Write(b)
-	l.size += size
-	return size, err
-}
+func (l *responseLogger) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (l *responseLogger) WriteHeader(s int) {
-	l.w.WriteHeader(s)
-	l.status = s
-}
+func (l *responseLogger) WriteHeader(s int) { _ = "STUB: not implemented"; return }
 
-func (l *responseLogger) Status() int {
-	return l.status
-}
+func (l *responseLogger) Status() int { _ = "STUB: not implemented"; return 0 }
 
-func (l *responseLogger) Size() int {
-	return l.size
-}
+func (l *responseLogger) Size() int { _ = "STUB: not implemented"; return 0 }
 
 func (l *responseLogger) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	conn, rw, err := l.w.(http.Hijacker).Hijack()
-	if err == nil && l.status == 0 {
-		// The status will be StatusSwitchingProtocols if there was no error and
-		// WriteHeader has not been called yet
-		l.status = http.StatusSwitchingProtocols
-	}
-	return conn, rw, err
+	_ = "STUB: not implemented"
+	return *new(net.Conn), nil, nil
 }
+
+// The status will be StatusSwitchingProtocols if there was no error and
+// WriteHeader has not been called yet
 
 // isContentType validates the Content-Type header matches the supplied
 // contentType. That is, its type and subtype match.
-func isContentType(h http.Header, contentType string) bool {
-	ct := h.Get("Content-Type")
-	if i := strings.IndexRune(ct, ';'); i != -1 {
-		ct = ct[0:i]
-	}
-	return ct == contentType
-}
+func isContentType(h http.Header, contentType string) bool { _ = "STUB: not implemented"; return false }
 
 // ContentTypeHandler wraps and returns a http.Handler, validating the request
 // content type is compatible with the contentTypes list. It writes a HTTP 415
@@ -96,23 +61,8 @@ func isContentType(h http.Header, contentType string) bool {
 //
 // Only PUT, POST, and PATCH requests are considered.
 func ContentTypeHandler(h http.Handler, contentTypes ...string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !(r.Method == http.MethodPut || r.Method == http.MethodPost || r.Method == http.MethodPatch) {
-			h.ServeHTTP(w, r)
-			return
-		}
-
-		for _, ct := range contentTypes {
-			if isContentType(r.Header, ct) {
-				h.ServeHTTP(w, r)
-				return
-			}
-		}
-		http.Error(w, fmt.Sprintf("Unsupported content type %q; expected one of %q",
-			r.Header.Get("Content-Type"),
-			contentTypes),
-			http.StatusUnsupportedMediaType)
-	})
+	_ = "STUB: not implemented"
+	return *new(http.Handler)
 }
 
 const (
@@ -135,16 +85,6 @@ const (
 //
 // Form method takes precedence over header method.
 func HTTPMethodOverrideHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			om := r.FormValue(HTTPMethodOverrideFormKey)
-			if om == "" {
-				om = r.Header.Get(HTTPMethodOverrideHeader)
-			}
-			if om == http.MethodPut || om == http.MethodPatch || om == http.MethodDelete {
-				r.Method = om
-			}
-		}
-		h.ServeHTTP(w, r)
-	})
+	_ = "STUB: not implemented"
+	return *new(http.Handler)
 }
